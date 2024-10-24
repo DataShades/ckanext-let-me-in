@@ -1,3 +1,47 @@
+[build-system]
+requires = ["setuptools>=61.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ckanext-let-me-in"
+version = "1.0.1"
+description = "An extension that generates a one-time login link for a user"
+authors = [
+    {name = "DataShades", email = "datashades@linkdigital.com.au"},
+    {name = "Oleksandr Cherniavskyi", email = "mutantsan@gmail.com"},
+]
+maintainers = [
+    {name = "DataShades", email = "datashades@linkdigital.com.au"},
+]
+license = {text = "AGPL"}
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+]
+keywords = ["CKAN"]
+dependencies = []
+optional-dependencies = {}
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[project.urls]
+Homepage = "https://github.com/mutantsan/ckanext-let-me-in"
+
+[project.entry-points]
+"babel.extractors" = {ckan = "ckan.lib.extract:extract_ckan"}
+
+[project.entry-points."ckan.plugins"]
+let_me_in = "ckanext.let_me_in.plugin:LetMeInPlugin"
+test_otl_plugin = "ckanext.let_me_in.tests.test_interface:TestOTLPlugin"
+
+[tool.setuptools.packages]
+find = {}
+
 [tool.black]
 # line-length = 88
 # preview = true
