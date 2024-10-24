@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ckanext-let-me-in"
-version = "1.0.11"
+version = "1.0.12"
 description = "An extension that generates a one-time login link for a user"
 authors = [
     {name = "DataShades", email = "datashades@linkdigital.com.au"},
@@ -30,7 +30,7 @@ file = "README.md"
 content-type = "text/markdown"
 
 [project.urls]
-Homepage = "https://github.com/mutantsan/ckanext-let-me-in"
+Homepage = "https://github.com/DataShades/ckanext-let-me-in"
 
 [project.entry-points]
 "babel.extractors" = {ckan = "ckan.lib.extract:extract_ckan"}

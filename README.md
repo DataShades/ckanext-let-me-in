@@ -1,4 +1,4 @@
-[![Tests](https://github.com/mutantsan/ckanext-let-me-in/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/mutantsan/ckanext-let-me-in/actions/workflows/test.yml)
+[![Tests](https://github.com/DataShades/ckanext-let-me-in/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/DataShades/ckanext-let-me-in/actions/workflows/test.yml)
 
 # ckanext-let-me-in
 
@@ -35,7 +35,7 @@ Available configuration options:
 To install ckanext-let-me-in for development, activate your CKAN virtualenv and
 do:
 
-    git clone https://github.com/mutantsan/ckanext-let-me-in.git
+    git clone https://github.com/DataShades/ckanext-let-me-in.git
     cd ckanext-let-me-in
     python setup.py develop
 
