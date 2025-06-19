@@ -13,10 +13,12 @@ The link will expire in 24h, by default or after it was used.
 Compatibility with core CKAN versions:
 
 | CKAN version    | Compatible? |
-| --------------- | ----------- |
+| --------------- |-------------|
 | 2.8 and earlier | no          |
 | 2.9             | not yet     |
-| 2.10+           | yes         |
+| 2.10            | yes         |
+| 2.11            | yes         |
+| master          | not tested  |
 
 ## Installation
 
