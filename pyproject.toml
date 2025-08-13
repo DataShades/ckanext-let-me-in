@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ckanext-let-me-in"
-version = "1.0.12"
+version = "1.0.13"
 description = "An extension that generates a one-time login link for a user"
 authors = [
     {name = "DataShades", email = "datashades@linkdigital.com.au"},
