@@ -34,7 +34,7 @@ class TestOTLPlugin(p.SingletonPlugin):
 
 @pytest.mark.ckan_config("ckan.plugins", "let_me_in test_otl_plugin")
 @pytest.mark.usefixtures("non_clean_db", "with_plugins")
-class TestOTLInterace(object):
+class TestOTLInterace:
     def test_xxx(self, app, user, sysadmin):
         result = call_action("lmi_generate_otl", uid=user["id"])
 

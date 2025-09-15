@@ -1,0 +1,24 @@
+{% ckan_extends %}
+
+{% block header_account_log_out_link %}
+    <li>
+        {% if h.lmi_is_current_user_an_impostor() %}
+            <form action="{{ h.url_for('let_me_in_impostor.return_identity') }}" method="post">
+                {{ h.csrf_input() }}
+                <button class="btn btn-link text-white" type="submit"
+                    aria-label="{{ _('Return original identity') }}"
+                    data-bs-title="{{ _('Return original identity') }}"
+                    data-bs-toggle="tooltip">
+                    <i class="fa fa-arrow-left-rotate" aria-hidden="true"></i>
+                </button>
+            </form>
+        {% else %}
+            <form action="{{ h.url_for('user.logout') }}" method="post">
+                {{ h.csrf_input() }}
+                <button class="btn btn-link" type="submit" aria-label="{{ _('Log out') }}" data-bs-title="{{ _('Log out') }}" data-bs-toggle="tooltip">
+                    <i class="fa fa-sign-out" aria-hidden="true"></i>
+                </button>
+            </form>
+        {% endif %}
+    </li>
+{% endblock %}

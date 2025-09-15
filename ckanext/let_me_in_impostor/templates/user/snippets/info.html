@@ -1,0 +1,19 @@
+{% ckan_extends %}
+
+
+{% block secondary_content_inner %}
+    {{ super() }}
+
+    {% if user.id != current_user.id and not h.lmi_is_current_user_an_impostor() %}
+        <form method="POST" action="{{ h.url_for('let_me_in_impostor.burrow_identity') }}">
+            {{ h.csrf_input() }}
+
+            <input type="hidden" name="user_id" value="{{ user.id }}"/>
+
+            <button class="btn btn-outline-primary align-items-baseline">
+                <i class="fa fa-user-secret" aria-hidden="true"></i>
+                {{ _('Burrow Identity') }}
+            </button>
+        </form>
+    {% endif %}
+{% endblock %}

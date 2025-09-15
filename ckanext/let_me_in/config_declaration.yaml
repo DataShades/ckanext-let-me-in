@@ -7,3 +7,9 @@ groups:
         description: Specify a default TTL for an OTL link in seconds
         default: 86400
         validators: ignore_missing int_validator is_positive_integer
+
+      - key: ckanext.let_me_in.impostor.ttl
+        type: int
+        description: Specify a default TTL for an Impostor session in seconds
+        default: 900
+        validators: ignore_missing int_validator is_positive_integer

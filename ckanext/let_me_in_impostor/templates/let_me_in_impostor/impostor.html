@@ -1,0 +1,70 @@
+{% extends "admin/base.html" %}
+
+{% block subtitle %}{{ _('LMI - Impostor') }}{% endblock %}
+
+{% block page_header %}
+{% endblock %}
+
+{% block primary_content_inner %}
+    <form method="POST" action="{{ h.url_for('let_me_in_impostor.burrow_identity') }}">
+        {{ h.csrf_input() }}
+
+        <div class="form-group">
+            <label class="form-label" for="user_id">
+                {{ _('User') }}
+            </label>
+            <select id="field-add_group" name="user_id" data-module="autocomplete">
+                {% for user in h.lmi_get_active_users() %}
+                    <option value="{{ user.id }}"> {{ user.display_name }} ({{ user.email }})</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-actions">
+            <button class="btn btn-outline-primary align-items-baseline">
+                <i class="fa fa-user-secret" aria-hidden="true"></i>
+                {{ _('Burrow Identity') }}
+            </button>
+        </div>
+    </form>
+
+    <div class="module module-narrow module-shallow">
+        <h3>{{ _("Session history") }}</h3>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>{{ _('Impostor') }}</th>
+                    <th>{{ _('Target User') }}</th>
+                    <th>{{ _('Created') }}</th>
+                    <th>{{ _('State') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for session in h.lmi_get_impostor_sessions(current_user.id) %}
+                    <tr>
+                        <td>{{ h.linked_user(session.user) }}</td>
+                        <td>{{ h.linked_user(session.target_user) }}</td>
+                        <td>{{ h.render_datetime(session.created, with_seconds=True) }}</td>
+                        <td>{{ session.state }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block secondary_content %}
+    <div class="module module-narrow module-shallow">
+        <h2 class="module-heading">
+            <i class="fa fa-info-circle"></i>
+            {{ _("Impostor") }}
+        </h2>
+        <div class="module-content">
+            <p>{{ _("This action will allow you to burrow into another user's account without needing their password.") }}</p>
+            <p>{{ _("You will be logged in as the target user.") }} </p>
+            <p>{{ _("Use this feature with caution and only for legitimate administrative purposes.") }}</p>
+        </div>
+    </div>
+
+
+{% endblock %}
