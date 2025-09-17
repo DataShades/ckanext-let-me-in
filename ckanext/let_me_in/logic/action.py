@@ -19,7 +19,7 @@ import ckanext.let_me_in.utils as lmi_utils
 def lmi_generate_otl(
     context: types.Context, data_dict: types.DataDict
 ) -> types.ActionResult.AnyDict:
-    """Generate a one-time login link for a specified user
+    """Generate a one-time login link for a specified user.
 
     :param uid: user ID
     :type uid: str

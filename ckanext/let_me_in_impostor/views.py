@@ -9,6 +9,7 @@ from flask.views import MethodView
 import ckan.plugins.toolkit as tk
 from ckan import model
 from ckan.common import session
+from ckan.lib.helpers import Page
 
 import ckanext.let_me_in.config as lmi_config
 import ckanext.let_me_in.utils as lmi_utils
@@ -30,51 +31,64 @@ def before_request() -> None:
 
 class ImpostorView(MethodView):
     def get(self) -> str:
-        return tk.render("let_me_in_impostor/impostor.html")
+        sessions = ImpostorSession.all()
+
+        self._check_expired_session()
+
+        return tk.render(
+            "let_me_in_impostor/impostor.html", extra_vars={"sessions": sessions}
+        )
+
+    def _check_expired_session(self) -> None:
+        current_time = time.time()
+
+        for imp_session in ImpostorSession.all(ImpostorSession.State.active):
+            if imp_session.expires > current_time:
+                continue
+
+            imp_session.expire()
 
 
 class BurrowIdentityView(MethodView):
     def post(self) -> Response:
-        if session.get("lmi_impostor_user_id"):
+        if tk.h.lmi_is_current_user_an_impostor():
             tk.h.flash_error(
                 tk._("You are already impersonating another user"), "error"
             )
-            return tk.redirect_to(tk.url_for("home"))
+            return tk.redirect_to("let_me_in_impostor.impostor")
 
         user = self._get_user(tk.request.form.get("user_id", ""))
         ttl = lmi_config.get_impostor_ttl()
 
-        session["lmi_impostor_user_id"] = tk.current_user.id
-        session["lmi_impostor_expires"] = time.time() + ttl
-
-        ImpostorSession.create(
+        imp_session = ImpostorSession.create(
             user_id=tk.current_user.id,
             target_user_id=user.id,
-            expires=session["lmi_impostor_expires"],
+            expires=int(time.time() + ttl),
         )
+
+        session["lmi_impostor_session_id"] = imp_session.id
 
         tk.login_user(user)
 
         tk.h.flash_success(
-            tk._("You are now impersonating user: %s for %d seconds")
-            % (user.name, ttl),
+            tk._("You are now impersonating user %s for %d seconds") % (user.name, ttl),
             "success",
         )
 
-        return tk.redirect_to(tk.url_for("home"))
+        return tk.redirect_to("home.index")
 
     def _get_user(self, user_id: str) -> model.User:
         user_id = tk.request.form.get("user_id")
 
         if not user_id:
             tk.h.flash_error(tk._("No user selected"), "error")
-            tk.redirect_to(tk.url_for("let_me_in_impostor.impostor"))
+            tk.redirect_to("let_me_in_impostor.impostor")
 
         user = lmi_utils.get_user(user_id)
 
         if user is None:
             tk.h.flash_error(tk._("User not found"), "error")
-            tk.redirect_to(tk.url_for("let_me_in_impostor.impostor"))
+            tk.redirect_to("let_me_in_impostor.impostor")
 
         user = cast(model.User, user)
 
@@ -87,28 +101,50 @@ class BurrowIdentityView(MethodView):
 
 class ReturnIdentityView(MethodView):
     def post(self) -> Response:
-        original_user_id = session.pop("lmi_impostor_user_id", None)
-        session.pop("lmi_impostor_expires", None)
+        session_id = session.pop("lmi_impostor_session_id", None)
 
-        active_session = ImpostorSession.get(original_user_id, tk.current_user.id)
+        imp_session = ImpostorSession.get(session_id)
 
-        if not active_session:
+        if not imp_session:
             tk.h.flash_error(tk._("No active impersonation session found"), "error")
-            return tk.redirect_to(tk.url_for("home"))
+            return tk.redirect_to("home.index")
 
-        original_user = cast(model.User, model.User.get(original_user_id))
+        imp_session.expire()
 
-        active_session.expire()
-
-        tk.login_user(original_user)
-
-        lmi_utils.update_user_last_active(original_user)
+        tk.login_user(imp_session.user)
+        lmi_utils.update_user_last_active(imp_session.user)
 
         tk.h.flash_success(
             tk._("You have returned to your original identity."), "success"
         )
 
-        return tk.redirect_to(tk.url_for("home"))
+        return tk.redirect_to("let_me_in_impostor.impostor")
+
+
+class TerminateSessionView(MethodView):
+    def post(self) -> Response:
+        session_id = tk.request.form.get("session_id", "")
+
+        session = ImpostorSession.get_by_session_id(session_id)
+
+        if not session:
+            tk.h.flash_error(tk._("Session not found"), "error")
+            return tk.redirect_to(tk.url_for("let_me_in_impostor.impostor"))
+
+        session.terminate()
+
+        tk.h.flash_success(tk._("Impersonation session terminated."), "success")
+
+        return tk.redirect_to(tk.url_for("let_me_in_impostor.impostor"))
+
+
+class ClearSessionHistoryView(MethodView):
+    def post(self) -> Response:
+        ImpostorSession.clear_history()
+
+        tk.h.flash_success(tk._("Impersonation session history cleared."), "success")
+
+        return tk.redirect_to(tk.url_for("let_me_in_impostor.impostor"))
 
 
 bp.before_request(before_request)
@@ -119,4 +155,11 @@ bp.add_url_rule(
 )
 bp.add_url_rule(
     "/return-identity", view_func=ReturnIdentityView.as_view("return_identity")
+)
+bp.add_url_rule(
+    "/terminate-session", view_func=TerminateSessionView.as_view("terminate_session")
+)
+bp.add_url_rule(
+    "/clear-session-history",
+    view_func=ClearSessionHistoryView.as_view("clear_session_history"),
 )

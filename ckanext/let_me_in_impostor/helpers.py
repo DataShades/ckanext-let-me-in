@@ -2,7 +2,7 @@ import ckan.plugins.toolkit as tk
 from ckan import model
 from ckan.common import session
 
-from ckanext.let_me_in_impostor.model import ImpostorSession
+import ckanext.let_me_in.config as lmi_config
 
 
 def lmi_get_active_users():
@@ -17,14 +17,17 @@ def lmi_get_active_users():
         .all()
     )
 
+
 def lmi_is_current_user_an_impostor():
     """Check if the current user is an impostor."""
-    return session.get("lmi_impostor_user_id") is not None
+    return session.get("lmi_impostor_session_id") is not None
 
 
-def lmi_get_impostor_sessions(user_id: str):
-    """Return a list of all impostor session for the given user."""
-    if not tk.current_user:
-        return []
+def lmi_show_toolbar_button() -> bool:
+    """Return whether to show the Impostor link in the toolbar for sysadmins."""
+    return lmi_config.get_show_toolbar_button()
 
-    return ImpostorSession.list(user_id)
+
+def lmi_get_session_records_per_page() -> int:
+    """Return the number of session records to show per page."""
+    return lmi_config.get_impostor_activity_per_page()

@@ -25,20 +25,19 @@ class LetMeInImpostorPlugin(p.SingletonPlugin):
     # IAuthenticator
 
     def identify(self) -> None:
-        original_user_id = session.get("lmi_impostor_user_id")
+        session_id = session.get("lmi_impostor_session_id")
 
-        active_session = ImpostorSession.get(original_user_id, tk.current_user.id)
+        imp_session = ImpostorSession.get(session_id)
 
-        if not active_session:
+        if not imp_session:
             return
 
-        if active_session.expires < time.time() or not active_session.active:
+        if imp_session.expires < time.time() or not imp_session.active:
             tk.logout_user()
-            tk.login_user(active_session.user)
+            tk.login_user(imp_session.user)
 
-            session.pop("lmi_impostor_user_id", None)
-            session.pop("lmi_impostor_expires", None)
+            session.pop("lmi_impostor_session_id", None)
 
-            active_session.expire()
+            imp_session.expire()
 
             tk.h.flash_success(tk._("You have been logged out of burrowed identity."))

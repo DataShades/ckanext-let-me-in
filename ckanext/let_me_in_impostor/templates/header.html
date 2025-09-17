@@ -1,5 +1,17 @@
 {% ckan_extends %}
 
+{% block header_account_logged %}
+    {% if g.userobj.sysadmin and h.lmi_show_toolbar_button() %}
+        <li>
+            <a href="{{ h.url_for('let_me_in_impostor.impostor') }}">
+                <i class="fa fa-user-secret" aria-hidden="true"></i>
+            </a>
+        </li>
+    {% endif %}
+
+    {{ super() }}
+{% endblock %}
+
 {% block header_account_log_out_link %}
     <li>
         {% if h.lmi_is_current_user_an_impostor() %}

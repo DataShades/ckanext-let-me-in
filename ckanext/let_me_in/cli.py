@@ -6,6 +6,8 @@ import click
 
 import ckan.plugins.toolkit as tk
 
+from ckanext.let_me_in.config import get_default_otl_link_ttl
+
 logger = logging.getLogger(__name__)
 
 __all__ = [
@@ -22,11 +24,20 @@ def letmein():
 @click.option("--uid", "-n", default=None, help="User ID")
 @click.option("--name", "-u", default=None, help="User name")
 @click.option("--mail", "-e", default=None, help="User email")
-def uli(uid: str, name: str, mail: str):
+@click.option(
+    "--ttl", "-t", default=None, type=int, help="Link time-to-live in seconds"
+)
+def uli(uid: str, name: str, mail: str, ttl: int):
     """Create a one-time login link for a user by its ID/name/email."""
     try:
         result = tk.get_action("lmi_generate_otl")(
-            {"ignore_auth": True}, {"uid": uid, "name": name, "mail": mail}
+            {"ignore_auth": True},
+            {
+                "uid": uid,
+                "name": name,
+                "mail": mail,
+                "ttl": ttl or get_default_otl_link_ttl(),
+            },
         )
     except tk.ValidationError as e:
         return click.secho(e.error_dict, fg="red", err=True)

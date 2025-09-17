@@ -6,6 +6,15 @@
 {% endblock %}
 
 {% block primary_content_inner %}
+    {% set is_an_impostor = h.lmi_is_current_user_an_impostor() %}
+
+    {% if is_an_impostor %}
+        <div class="alert alert-warning" role="alert">
+            <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+            {{ _("You are currently impersonating another user. Click a \"Return\" button at the toolbar to go back to your original account.") }}
+        </div>
+    {% endif %}
+
     <form method="POST" action="{{ h.url_for('let_me_in_impostor.burrow_identity') }}">
         {{ h.csrf_input() }}
 
@@ -13,7 +22,7 @@
             <label class="form-label" for="user_id">
                 {{ _('User') }}
             </label>
-            <select id="field-add_group" name="user_id" data-module="autocomplete">
+            <select id="field-add_group" name="user_id" data-module="autocomplete" {{ 'disabled' if is_an_impostor }}>
                 {% for user in h.lmi_get_active_users() %}
                     <option value="{{ user.id }}"> {{ user.display_name }} ({{ user.email }})</option>
                 {% endfor %}
@@ -21,7 +30,7 @@
         </div>
 
         <div class="form-actions">
-            <button class="btn btn-outline-primary align-items-baseline">
+            <button class="btn btn-outline-primary align-items-baseline" {{ 'disabled' if is_an_impostor }}>
                 <i class="fa fa-user-secret" aria-hidden="true"></i>
                 {{ _('Burrow Identity') }}
             </button>
@@ -29,23 +38,47 @@
     </form>
 
     <div class="module module-narrow module-shallow">
-        <h3>{{ _("Session history") }}</h3>
-        <table class="table table-striped">
+        <h3 class="mb-3">{{ _("Session history") }}</h3>
+        <table class="table table-header" id="impostor-sessions-table"
+            data-module="lmi-impostor-session-table" data-module-per-page="{{ h.lmi_get_session_records_per_page() }}">
             <thead>
                 <tr>
                     <th>{{ _('Impostor') }}</th>
                     <th>{{ _('Target User') }}</th>
                     <th>{{ _('Created') }}</th>
                     <th>{{ _('State') }}</th>
+                    <th>{{ _("Actions") }}</th>
                 </tr>
             </thead>
             <tbody>
-                {% for session in h.lmi_get_impostor_sessions(current_user.id) %}
+                {% for session in sessions %}
                     <tr>
                         <td>{{ h.linked_user(session.user) }}</td>
                         <td>{{ h.linked_user(session.target_user) }}</td>
                         <td>{{ h.render_datetime(session.created, with_seconds=True) }}</td>
                         <td>{{ session.state }}</td>
+                        <td>
+                            {% if session.state == "active" %}
+                                <form method="POST" action="{{ h.url_for('let_me_in_impostor.terminate_session') }}">
+                                    {{ h.csrf_input() }}
+                                    <input type="hidden" name="session_id" value="{{ session.id }}"/>
+                                    <button class="btn align-items-baseline btn-danger btn-sm" title="{{ _('Terminate this active session') }}">
+                                        <i class="fa fa-undo" aria-hidden="true"></i>
+                                        {{ _('Terminate') }}
+                                    </button>
+                                </form>
+                            {% endif %}
+
+                            {% if session.state != "active" and not is_an_impostor %}
+                                <form method="POST" action="{{ h.url_for('let_me_in_impostor.burrow_identity') }}">
+                                    {{ h.csrf_input() }}
+                                    <input type="hidden" name="user_id" value="{{ session.target_user.id }}"/>
+                                    <button class="btn align-items-baseline btn-outline-primary btn-sm" title="{{ _('Burrow this identity') }}">
+                                        <i class="fa fa-user-secret" aria-hidden="true"></i>
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -59,12 +92,37 @@
             <i class="fa fa-info-circle"></i>
             {{ _("Impostor") }}
         </h2>
-        <div class="module-content">
+        <div class="p-3">
             <p>{{ _("This action will allow you to burrow into another user's account without needing their password.") }}</p>
             <p>{{ _("You will be logged in as the target user.") }} </p>
-            <p>{{ _("Use this feature with caution and only for legitimate administrative purposes.") }}</p>
+            <p class="m-0">{{ _("Use this feature with caution and only for legitimate administrative purposes.") }}</p>
+        </div>
+
+        <hr class="m-0">
+
+        <div class="p-3">
+            <p>{{ _("You can clear the impersonation session history related to your account.") }}</p>
+
+            <form method="POST" action="{{ h.url_for('let_me_in_impostor.clear_session_history') }}">
+                {{ h.csrf_input() }}
+
+                <button class="btn btn-outline-danger align-items-baseline">
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                    {{ _('Clear Session History') }}
+                </button>
+            </form>
         </div>
     </div>
+{% endblock %}
 
+{% block styles %}
+    {{ super() }}
 
+    {% asset "let_me_in_impostor/lmi_impostor-css" %}
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+
+    {% asset "let_me_in_impostor/lmi_impostor-js" %}
 {% endblock %}
