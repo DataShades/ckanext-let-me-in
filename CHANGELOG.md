@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.2] - 2025-09-19
+
+### 🐛 Bug Fixes
+
+- Ignore static endpoints in identify
+
+### 📚 Documentation
+
+- Update changelog [no ci]
+
 ## [1.1.1] - 2025-09-19
 
 ### 🐛 Bug Fixes
