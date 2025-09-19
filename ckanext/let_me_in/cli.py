@@ -24,9 +24,7 @@ def letmein():
 @click.option("--uid", "-n", default=None, help="User ID")
 @click.option("--name", "-u", default=None, help="User name")
 @click.option("--mail", "-e", default=None, help="User email")
-@click.option(
-    "--ttl", "-t", default=None, type=int, help="Link time-to-live in seconds"
-)
+@click.option("--ttl", "-t", default=None, type=int, help="Link time-to-live in seconds")
 def uli(uid: str, name: str, mail: str, ttl: int):
     """Create a one-time login link for a user by its ID/name/email."""
     try:

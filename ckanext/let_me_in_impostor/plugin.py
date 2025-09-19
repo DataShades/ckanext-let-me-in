@@ -4,7 +4,6 @@ import time
 
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
-from ckan import model
 from ckan.common import session
 
 from ckanext.let_me_in_impostor.model import ImpostorSession

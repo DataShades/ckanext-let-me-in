@@ -11,14 +11,12 @@ from ckan import model, types
 from ckan.logic import validate
 
 import ckanext.let_me_in.config as lmi_config
-import ckanext.let_me_in.logic.schema as schema
 import ckanext.let_me_in.utils as lmi_utils
+from ckanext.let_me_in.logic import schema
 
 
 @validate(schema.lmi_generate_otl)
-def lmi_generate_otl(
-    context: types.Context, data_dict: types.DataDict
-) -> types.ActionResult.AnyDict:
+def lmi_generate_otl(context: types.Context, data_dict: types.DataDict) -> types.ActionResult.AnyDict:
     """Generate a one-time login link for a specified user.
 
     :param uid: user ID
@@ -55,7 +53,7 @@ def lmi_generate_otl(
         )
 
     user = cast(model.User, lmi_utils.get_user(uid or name or mail))
-    now = dt.utcnow()
+    now = dt.utcnow()  # noqa DTZ003
 
     token = jwt.encode(
         {

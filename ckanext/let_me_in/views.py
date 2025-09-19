@@ -20,9 +20,7 @@ lmi = Blueprint("lmi", __name__)
 @lmi.route("/lmi/<token>")
 def login_with_token(token: str):
     try:
-        token_data = jwt.decode(
-            token, lmi_utils.get_secret(False), algorithms=["HS256"]
-        )
+        token_data = jwt.decode(token, lmi_utils.get_secret(False), algorithms=["HS256"])
     except jwt.ExpiredSignatureError:
         tk.h.flash_error(tk._("The login link has expired. Please request a new one."))
         return tk.h.redirect_to("user.login")
@@ -45,12 +43,10 @@ def login_with_token(token: str):
         tk.h.flash_error(tk._("User is not active. Can't login"))
         return tk.h.redirect_to("user.login")
 
-    if user.last_active and user.last_active > dt.datetime.fromtimestamp( # noqa: DTZ006
+    if user.last_active and user.last_active > dt.datetime.fromtimestamp(  # noqa: DTZ006
         token_data["created_at"]
     ):
-        tk.h.flash_error(
-            tk._("You have tried to use a one-time login link that has expired.")
-        )
+        tk.h.flash_error(tk._("You have tried to use a one-time login link that has expired."))
         return tk.h.redirect_to("user.login")
 
     for plugin in p.PluginImplementations(ILetMeIn):

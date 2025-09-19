@@ -1,5 +1,7 @@
 {% extends "admin/base.html" %}
 
+{% import 'macros/form.html' as form %}
+
 {% block subtitle %}{{ _('LMI - Impostor') }}{% endblock %}
 
 {% block page_header %}
@@ -7,6 +9,7 @@
 
 {% block primary_content_inner %}
     {% set is_an_impostor = h.lmi_is_current_user_an_impostor() %}
+    {% set active_users = h.lmi_get_active_users_options() %}
 
     {% if is_an_impostor %}
         <div class="alert alert-warning" role="alert">
@@ -15,75 +18,11 @@
         </div>
     {% endif %}
 
-    <form method="POST" action="{{ h.url_for('let_me_in_impostor.burrow_identity') }}">
-        {{ h.csrf_input() }}
-
-        <div class="form-group">
-            <label class="form-label" for="user_id">
-                {{ _('User') }}
-            </label>
-            <select id="field-add_group" name="user_id" data-module="autocomplete" {{ 'disabled' if is_an_impostor }}>
-                {% for user in h.lmi_get_active_users() %}
-                    <option value="{{ user.id }}"> {{ user.display_name }} ({{ user.email }})</option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="form-actions">
-            <button class="btn btn-outline-primary align-items-baseline" {{ 'disabled' if is_an_impostor }}>
-                <i class="fa fa-user-secret" aria-hidden="true"></i>
-                {{ _('Burrow Identity') }}
-            </button>
-        </div>
-    </form>
-
-    <div class="module module-narrow module-shallow">
-        <h3 class="mb-3">{{ _("Session history") }}</h3>
-        <table class="table table-header" id="impostor-sessions-table"
-            data-module="lmi-impostor-session-table" data-module-per-page="{{ h.lmi_get_session_records_per_page() }}">
-            <thead>
-                <tr>
-                    <th>{{ _('Impostor') }}</th>
-                    <th>{{ _('Target User') }}</th>
-                    <th>{{ _('Created') }}</th>
-                    <th>{{ _('State') }}</th>
-                    <th>{{ _("Actions") }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for session in sessions %}
-                    <tr>
-                        <td>{{ h.linked_user(session.user) }}</td>
-                        <td>{{ h.linked_user(session.target_user) }}</td>
-                        <td>{{ h.render_datetime(session.created, with_seconds=True) }}</td>
-                        <td>{{ session.state }}</td>
-                        <td>
-                            {% if session.state == "active" %}
-                                <form method="POST" action="{{ h.url_for('let_me_in_impostor.terminate_session') }}">
-                                    {{ h.csrf_input() }}
-                                    <input type="hidden" name="session_id" value="{{ session.id }}"/>
-                                    <button class="btn align-items-baseline btn-danger btn-sm" title="{{ _('Terminate this active session') }}">
-                                        <i class="fa fa-undo" aria-hidden="true"></i>
-                                        {{ _('Terminate') }}
-                                    </button>
-                                </form>
-                            {% endif %}
-
-                            {% if session.state != "active" and not is_an_impostor %}
-                                <form method="POST" action="{{ h.url_for('let_me_in_impostor.burrow_identity') }}">
-                                    {{ h.csrf_input() }}
-                                    <input type="hidden" name="user_id" value="{{ session.target_user.id }}"/>
-                                    <button class="btn align-items-baseline btn-outline-primary btn-sm" title="{{ _('Burrow this identity') }}">
-                                        <i class="fa fa-user-secret" aria-hidden="true"></i>
-                                    </button>
-                                </form>
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+    {% snippet "let_me_in_impostor/impostor_burrow_identity.html", form=form, is_an_impostor=is_an_impostor, active_users=active_users %}
+    <hr>
+    {% snippet "let_me_in_impostor/impostor_generate_otl.html", form=form, otl_link=otl_link, otl_ttl=otl_ttl, active_users=active_users %}
+    <hr>
+    {% snippet "let_me_in_impostor/impostor_session_history.html", form=form, sessions=sessions %}
 {% endblock %}
 
 {% block secondary_content %}
@@ -93,6 +32,7 @@
             {{ _("Impostor") }}
         </h2>
         <div class="p-3">
+            <h3>{{ _("Burrow Identity") }}</h3>
             <p>{{ _("This action will allow you to burrow into another user's account without needing their password.") }}</p>
             <p>{{ _("You will be logged in as the target user.") }} </p>
             <p class="m-0">{{ _("Use this feature with caution and only for legitimate administrative purposes.") }}</p>
@@ -101,7 +41,15 @@
         <hr class="m-0">
 
         <div class="p-3">
-            <p>{{ _("You can clear the impersonation session history related to your account.") }}</p>
+            <h3>{{ _("Generate One-Time Login Link") }}</h3>
+            <p>{{ _("This action will generate a one-time login link for the selected user.") }}</p>
+            <p class="m-0">{{ _("The link can be used only once and will expire after use or after a certain period.") }}</p>
+        </div>
+
+        <div class="p-3">
+            <h3>{{ _("Session History") }}</h3>
+            <p>{{ _("The session history shows all past and active impersonation sessions.") }}</p>
+            <p>{{ _("You can clear the impersonation session history by pressing the button below.") }}</p>
 
             <form method="POST" action="{{ h.url_for('let_me_in_impostor.clear_session_history') }}">
                 {{ h.csrf_input() }}

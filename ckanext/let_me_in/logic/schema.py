@@ -1,22 +1,23 @@
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Any
 
+from ckan import types
 from ckan.logic.schema import validator_args
 
-Schema = Dict[str, Any]
+Schema = dict[str, Any]
 
 
 @validator_args
-def lmi_generate_otl(
-    ignore_missing,
-    unicode_safe,
-    user_id_exists,
-    user_name_exists,
-    user_email_exists,
-    int_validator,
-    is_positive_integer,
-) -> Schema:
+def lmi_generate_otl(  # noqa: PLR0913
+    ignore_missing: types.Validator,
+    unicode_safe: types.Validator,
+    user_id_exists: types.Validator,
+    user_name_exists: types.Validator,
+    user_email_exists: types.Validator,
+    int_validator: types.Validator,
+    is_positive_integer: types.Validator,
+) -> types.Schema:
     return {
         "uid": [ignore_missing, unicode_safe, user_id_exists],
         "name": [ignore_missing, unicode_safe, user_name_exists],

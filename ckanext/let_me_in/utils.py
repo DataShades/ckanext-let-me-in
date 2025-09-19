@@ -22,5 +22,5 @@ def get_user(user_id: str) -> model.User | None:
 
 def update_user_last_active(user: model.User) -> None:
     """Update a last_active for a user after we logged him in."""
-    user.last_active = dt.utcnow() # noqa: DTZ003
+    user.last_active = dt.utcnow()  # noqa: DTZ003
     model.Session.commit()

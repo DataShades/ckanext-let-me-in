@@ -9,9 +9,7 @@ from ckan.tests.helpers import call_action
 @pytest.mark.usefixtures("non_clean_db", "with_plugins")
 class TestGenerateOTL:
     def test_generate_no_params(self):
-        with pytest.raises(
-            tk.ValidationError, match="Please, provide uid, name or mail option"
-        ):
+        with pytest.raises(tk.ValidationError, match="Please, provide uid, name or mail option"):
             call_action("lmi_generate_otl")
 
     @pytest.mark.usefixtures("clean_db")
@@ -48,7 +46,7 @@ class TestGenerateOTL:
 
     @pytest.mark.usefixtures("clean_db")
     @pytest.mark.parametrize(
-        "ttl,raises_error",
+        ("ttl", "raises_error"),
         [
             (1, False),
             (1000, False),

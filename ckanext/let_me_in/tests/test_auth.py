@@ -16,12 +16,8 @@ class TestGenerateOTLAuth:
     @pytest.mark.usefixtures("clean_db")
     def test_regular_user(self, user):
         with pytest.raises(tk.NotAuthorized):
-            call_auth(
-                "lmi_generate_otl", context={"user": user["name"], "model": model}
-            )
+            call_auth("lmi_generate_otl", context={"user": user["name"], "model": model})
 
     @pytest.mark.usefixtures("clean_db")
     def test_sysadmin(self, sysadmin):
-        call_auth(
-            "lmi_generate_otl", context={"user": sysadmin["name"], "model": model}
-        )
+        call_auth("lmi_generate_otl", context={"user": sysadmin["name"], "model": model})

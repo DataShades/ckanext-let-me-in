@@ -1,0 +1,47 @@
+<div class="module module-narrow module-shallow">
+    <h3 class="mb-3">{{ _("Session History") }}</h3>
+    <table class="table table-header" id="impostor-sessions-table"
+        data-module="lmi-impostor-session-table" data-module-per-page="{{ h.lmi_get_session_records_per_page() }}">
+        <thead>
+            <tr>
+                <th>{{ _('Impostor') }}</th>
+                <th>{{ _('Target User') }}</th>
+                <th>{{ _('Created') }}</th>
+                <th>{{ _('State') }}</th>
+                <th>{{ _("Actions") }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for session in sessions %}
+                <tr>
+                    <td>{{ h.linked_user(session.user) }}</td>
+                    <td>{{ h.linked_user(session.target_user) }}</td>
+                    <td>{{ h.render_datetime(session.created, with_seconds=True) }}</td>
+                    <td>{{ session.state }}</td>
+                    <td>
+                        {% if session.state == "active" %}
+                            <form method="POST" action="{{ h.url_for('let_me_in_impostor.terminate_session') }}">
+                                {{ h.csrf_input() }}
+                                <input type="hidden" name="session_id" value="{{ session.id }}"/>
+                                <button class="btn align-items-baseline btn-danger btn-sm" title="{{ _('Terminate this active session') }}">
+                                    <i class="fa fa-undo" aria-hidden="true"></i>
+                                    {{ _('Terminate') }}
+                                </button>
+                            </form>
+                        {% endif %}
+
+                        {% if session.state != "active" and not is_an_impostor and session.target_user.id != current_user.id %}
+                            <form method="POST" action="{{ h.url_for('let_me_in_impostor.burrow_identity') }}">
+                                {{ h.csrf_input() }}
+                                <input type="hidden" name="user_id" value="{{ session.target_user.id }}"/>
+                                <button class="btn align-items-baseline btn-outline-primary btn-sm" title="{{ _('Burrow this identity') }}">
+                                    <i class="fa fa-user-secret" aria-hidden="true"></i>
+                                </button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from typing import Any
 
-import ckanext.let_me_in.utils as lmi_utils
-from ckanext.let_me_in.interfaces import ILetMeIn
-
 import ckan.plugins as p
 import ckan.plugins.toolkit as tk
 from ckan import model
+
+import ckanext.let_me_in.utils as lmi_utils
+from ckanext.let_me_in.interfaces import ILetMeIn
 
 
 @tk.blanket.actions

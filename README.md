@@ -90,6 +90,8 @@ ckan letmein uli --uid=0daa9f1d-671a-49f3-a7a6-15f4a263ef49 --ttl=3600
 
 This optional subplugin allows system administrators to impersonate other users via a web interface for a limited time.
 
+![impostor admin page](doc/impostor_admin.png)
+
 > [!WARNING]
 > This feature is not intended for use in a production environment. It should be used only for testing and troubleshooting.
 
@@ -99,6 +101,7 @@ This optional subplugin allows system administrators to impersonate other users 
 - Login as any user directly from admin panel or user profile pages
 - Easy switch back to original admin account
 - Visual indicators when impersonating users
+- Generate OTL links for users from the UI
 
 ### Configuration
 
@@ -114,6 +117,7 @@ ckan.plugins = let_me_in let_me_in_impostor
 |---------|-------------|---------|---------|
 | `ckanext.let_me_in.impostor.ttl` | Impostor session timeout in seconds | `900` (15 minutes) | `7200` (2 hours) |
 | `ckanext.let_me_in.impostor.show_toolbar_button` | Show a link to the Impostor interface in the toolbar for sysadmins | `true` | `false` |
+| `ckanext.let_me_in.impostor.session_records_per_page` | Number of session records to show per page in the Impostor admin interface | `10` | `50` |
 
 ### Usage
 

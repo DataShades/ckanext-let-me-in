@@ -1,0 +1,24 @@
+<div class="module module-narrow module-shallow">
+    <h3 class="mb-3">{{ _("Burrow Identity") }}</h3>
+
+    <form method="POST" action="{{ h.url_for('let_me_in_impostor.burrow_identity') }}">
+        {{ h.csrf_input() }}
+
+        {% set form_attrs = {'data-module': 'autocomplete'} %}
+
+        {% if is_an_impostor %}
+            {% do form_attrs.update({"disabled": "disabled"}) %}
+        {% endif %}
+
+        {% call form.select('user_id', label=_('User'), options=active_users, attrs=form_attrs) %}
+            {{ form.info(_("Select the user whose identity you want to burrow.")) }}
+        {% endcall %}
+
+        <div class="form-actions">
+            <button class="btn btn-outline-primary align-items-baseline" {{ 'disabled' if is_an_impostor }}>
+                <i class="fa fa-user-secret" aria-hidden="true"></i>
+                {{ _('Burrow Identity') }}
+            </button>
+        </div>
+    </form>
+</div>
