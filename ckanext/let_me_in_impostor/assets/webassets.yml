@@ -1,0 +1,13 @@
+lmi_impostor-js:
+  filter: rjsmin
+  output: ckanext-let_me_in_impostor/%(version)s-lmi_impostor.js
+  contents:
+    - js/vendor/simple-datatables.min.js
+    - js/lmi_impostor_session_table.js
+
+lmi_impostor-css:
+  filter: cssrewrite
+  output: ckanext-let_me_in_impostor/%(version)s-lmi_impostor.css
+  contents:
+    - css/vendor/simple-datatables.min.css
+    - css/styles.css

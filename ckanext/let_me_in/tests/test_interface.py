@@ -34,26 +34,26 @@ class TestOTLPlugin(p.SingletonPlugin):
 
 @pytest.mark.ckan_config("ckan.plugins", "let_me_in test_otl_plugin")
 @pytest.mark.usefixtures("non_clean_db", "with_plugins")
-class TestOTLInterace(object):
-    def test_xxx(self, app, user, sysadmin):
+class TestOTLInterace:
+    def test_xxx(self, app, user):
         result = call_action("lmi_generate_otl", uid=user["id"])
 
         result = app.get(result["url"], status=200)
 
         manage_user_call_total = sum(
-            plugin.manage_user_call
+            plugin.manage_user_call  # type: ignore
             for plugin in p.PluginImplementations(ILetMeIn)
             if plugin.name == "test_otl_plugin"
         )
 
         before_otl_login_call_total = sum(
-            plugin.before_otl_login_call
+            plugin.before_otl_login_call  # type: ignore
             for plugin in p.PluginImplementations(ILetMeIn)
             if plugin.name == "test_otl_plugin"
         )
 
         after_otl_login_call_total = sum(
-            plugin.after_otl_login_call
+            plugin.after_otl_login_call  # type: ignore
             for plugin in p.PluginImplementations(ILetMeIn)
             if plugin.name == "test_otl_plugin"
         )

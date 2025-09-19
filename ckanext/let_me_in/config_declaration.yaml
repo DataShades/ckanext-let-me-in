@@ -7,3 +7,21 @@ groups:
         description: Specify a default TTL for an OTL link in seconds
         default: 86400
         validators: ignore_missing int_validator is_positive_integer
+
+      - key: ckanext.let_me_in.impostor.ttl
+        type: int
+        description: Specify a default TTL for an Impostor session in seconds
+        default: 900
+        validators: ignore_missing int_validator is_positive_integer
+
+      - key: ckanext.let_me_in.impostor.show_toolbar_button
+        type: bool
+        description: Show a link to the Impostor interface in the toolbar for sysadmins
+        default: true
+        validators: ignore_missing boolean_validator
+
+      - key: ckanext.let_me_in.impostor.activity_per_page
+        type: int
+        description: Number of Impostor activities to show per page
+        default: 10
+        validators: ignore_missing int_validator is_positive_integer

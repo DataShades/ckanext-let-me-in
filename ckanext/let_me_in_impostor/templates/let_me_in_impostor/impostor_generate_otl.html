@@ -1,0 +1,37 @@
+{% import 'macros/form.html' as form %}
+
+<div class="module module-narrow module-shallow">
+    <h3 class="mb-3">{{ _("Generate Login OTL") }}</h3>
+
+    <form method="POST" action="{{ h.url_for('let_me_in_impostor.generate_otl') }}">
+        {{ h.csrf_input() }}
+
+        {% if otl_link and otl_ttl %}
+            <div class="alert alert-info" role="alert">
+                <i class="fa fa-info-circle" aria-hidden="true"></i>
+                {{ _("Your one-time login link has been generated. It can be used only once and will expire either after use or in {} seconds.").format(otl_ttl) }}
+                <br>
+                <a class="text-break" href="{{ otl_link }}"><b>{{ otl_link }}</b></a>
+
+                <button class="btn btn-secondary btn-xs" data-module="copy-into-buffer"
+                    data-module-copy-value="{{ otl_link }}" type="button"><i class="fa fa-copy"></i></button>
+            </div>
+        {% endif %}
+
+
+        {% call form.select('otl_user_id', label=_('User'), options=active_users, attrs={'data-module': 'autocomplete'}) %}
+            {{ form.info(_("Select the user for whom you want to generate a one-time login link.")) }}
+        {% endcall %}
+
+        {% call form.input('ttl', label=_('Link Time-To-Live (TTL) in seconds'), type='number', value=h.lmi_get_default_otl_link_ttl()) %}
+            {{ form.info(_("The duration (in seconds) for which the one-time login link will remain valid.")) }}
+        {% endcall %}
+
+        <div class="form-actions">
+            <button class="btn btn-outline-primary align-items-baseline">
+                <i class="fa fa-link" aria-hidden="true"></i>
+                {{ _('Generate OTL') }}
+            </button>
+        </div>
+    </form>
+</div>

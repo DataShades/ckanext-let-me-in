@@ -1,13 +1,13 @@
 from __future__ import annotations
 
+import datetime as dt
 import logging
-from datetime import datetime as dt
 
 import jwt
 from flask import Blueprint
 
-import ckan.model as model
 import ckan.plugins as p
+from ckan import model
 from ckan.plugins import toolkit as tk
 
 import ckanext.let_me_in.utils as lmi_utils
@@ -18,9 +18,9 @@ lmi = Blueprint("lmi", __name__)
 
 
 @lmi.route("/lmi/<token>")
-def login_with_token(token):
+def login_with_token(token: str):
     try:
-        token = jwt.decode(token, lmi_utils.get_secret(False), algorithms=["HS256"])
+        token_data = jwt.decode(token, lmi_utils.get_secret(False), algorithms=["HS256"])
     except jwt.ExpiredSignatureError:
         tk.h.flash_error(tk._("The login link has expired. Please request a new one."))
         return tk.h.redirect_to("user.login")
@@ -28,7 +28,7 @@ def login_with_token(token):
         tk.h.flash_error(tk._("Invalid login link."))
         return tk.h.redirect_to("user.login")
 
-    user = lmi_utils.get_user(token["user_id"])
+    user = lmi_utils.get_user(token_data["user_id"])
 
     if not user:
         tk.h.flash_error(tk._("Invalid login link."))
@@ -43,10 +43,10 @@ def login_with_token(token):
         tk.h.flash_error(tk._("User is not active. Can't login"))
         return tk.h.redirect_to("user.login")
 
-    if user.last_active and user.last_active > dt.fromtimestamp(token["created_at"]):
-        tk.h.flash_error(
-            tk._("You have tried to use a one-time login link that has expired.")
-        )
+    if user.last_active and user.last_active > dt.datetime.fromtimestamp(  # noqa: DTZ006
+        token_data["created_at"]
+    ):
+        tk.h.flash_error(tk._("You have tried to use a one-time login link that has expired."))
         return tk.h.redirect_to("user.login")
 
     for plugin in p.PluginImplementations(ILetMeIn):

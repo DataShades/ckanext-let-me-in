@@ -7,10 +7,12 @@ from ckan.plugins.interfaces import Interface
 
 
 class ILetMeIn(Interface):
-    """Interface to do something on user login via OTL link"""
+    """Interface to do something on user login via OTL link."""
 
     def manage_user(self, user: model.User, context: dict[str, Any]) -> model.User:
-        """Accept a user object that will be logged. Only Active user could be
+        """Manage a user object before login.
+
+        Accept a user object that will be logged. Only Active user could be
         logged in, so here we could implement user re-activation, for example.
 
         The user is always exists, otherwise we are not getting here.
@@ -26,10 +28,11 @@ class ILetMeIn(Interface):
         return user
 
     def before_otl_login(self, user: model.User, context: dict[str, Any]) -> None:
-        """Allows to do something before we are logging in a user.
-        Happens after all checks and `manage_user` method."""
-        pass
+        """Hook before user login.
+
+        Allows to do something before we are logging in a user.
+        Happens after all checks and `manage_user` method.
+        """
 
     def after_otl_login(self, user: model.User, context: dict[str, Any]) -> None:
-        """Allows to do something after we logged in a user."""
-        pass
+        """Hook after user login."""
