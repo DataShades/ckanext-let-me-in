@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.1] - 2025-09-19
+
+### 🐛 Bug Fixes
+
+- Use a proper post login redirect endpoint
+
+### 📚 Documentation
+
+- Add changelog [no ci]
+
 ## [1.1.0] - 2025-09-19
 
 ### 🚀 Features
