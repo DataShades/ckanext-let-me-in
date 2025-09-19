@@ -62,6 +62,7 @@ ckan.plugins = let_me_in
 | Setting | Description | Default | Example |
 |---------|-------------|---------|---------|
 | `ckanext.let_me_in.otl_link_ttl` | Time in seconds that OTL links remain valid | `86400` (24 hours) | `3600` (1 hour) |
+| `ckan.auth.route_after_login` | Allows to customize the route that the user will get redirected to after a successful login. | `dashboard.datasets` | `dataset.search` |
 
 ### Usage
 

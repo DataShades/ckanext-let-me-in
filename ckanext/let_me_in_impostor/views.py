@@ -78,7 +78,7 @@ class BurrowIdentityView(MethodView):
             "success",
         )
 
-        return tk.redirect_to("home.index")
+        return tk.redirect_to("user.me")
 
 
 class ReturnIdentityView(MethodView):
@@ -89,7 +89,7 @@ class ReturnIdentityView(MethodView):
 
         if not imp_session:
             tk.h.flash_error(tk._("No active impersonation session found"), "error")
-            return tk.redirect_to("home.index")
+            return tk.redirect_to("user.me")
 
         imp_session.expire()
 
