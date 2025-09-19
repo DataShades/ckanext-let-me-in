@@ -25,9 +25,25 @@ A CKAN extension that provides secure one-time login functionality and optional 
 
 ### Standard Installation
 
-```bash
-pip install ckanext-let-me-in
-```
+
+1. Install it via **pip**:
+    ```bash
+    pip install ckanext-let-me-in
+    ```
+    Or from source:
+    ```bash
+    git clone https://github.com/DataShades/ckanext-let-me-in.git
+    cd ckanext-let-me-in
+    pip install -e .
+    ```
+
+2. Add `let_me_in` to the `ckan.plugins` setting in your CKAN config file.
+3. Run DB migrations:
+    ```sh
+    ckan db upgrade -p let_me_in
+    ```
+
+
 
 ### Developer Installation
 
@@ -49,20 +65,12 @@ This plugin allows generating secure one-time login links for users, which can b
 - Links expire after first use or TTL timeout
 - Secure token generation and validation
 
-### Configuration
-
-Add the plugin to your CKAN configuration:
-
-```ini
-ckan.plugins = let_me_in
-```
-
 ### Configuration Options
 
 | Setting | Description | Default | Example |
 |---------|-------------|---------|---------|
 | `ckanext.let_me_in.otl_link_ttl` | Time in seconds that OTL links remain valid | `86400` (24 hours) | `3600` (1 hour) |
-| `ckan.auth.route_after_login` | Allows to customize the route that the user will get redirected to after a successful login. | `dashboard.datasets` | `dataset.search` |
+| `**ckan.auth.route_after_login**` | Allows to customize the route that the user will get redirected to after a successful login. | `dashboard.datasets` | `dataset.search` |
 
 ### Usage
 

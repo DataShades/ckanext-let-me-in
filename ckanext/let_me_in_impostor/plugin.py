@@ -24,6 +24,9 @@ class LetMeInImpostorPlugin(p.SingletonPlugin):
     # IAuthenticator
 
     def identify(self) -> None:
+        if tk.get_endpoint() in {("static", "index"), ("webassets", "index")}:
+            return
+
         session_id = session.get("lmi_impostor_session_id")
 
         imp_session = ImpostorSession.get(session_id)

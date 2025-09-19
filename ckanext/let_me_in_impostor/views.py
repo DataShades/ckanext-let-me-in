@@ -57,7 +57,7 @@ class BurrowIdentityView(MethodView):
             return tk.redirect_to("let_me_in_impostor.impostor")
 
         ttl = lmi_config.get_impostor_ttl()
-        user = lmi_utils.get_user(tk.request.form.get("user_id"))
+        user = lmi_utils.get_user(tk.request.form.get("user_id", ""))
 
         if not user or user.state != model.State.ACTIVE:
             tk.h.flash_error(tk._("Active user not found"), "error")
