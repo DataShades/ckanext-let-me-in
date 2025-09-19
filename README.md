@@ -43,16 +43,6 @@ A CKAN extension that provides secure one-time login functionality and optional 
     ckan db upgrade -p let_me_in
     ```
 
-
-
-### Developer Installation
-
-```bash
-git clone https://github.com/DataShades/ckanext-let-me-in.git
-cd ckanext-let-me-in
-pip install -e .
-```
-
 ## One-Time Login Links
 
 This plugin allows generating secure one-time login links for users, which can be used to access their accounts without needing a password.
