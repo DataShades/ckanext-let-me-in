@@ -40,5 +40,5 @@ def uli(uid: str, name: str, mail: str, ttl: int):
     except tk.ValidationError as e:
         return click.secho(e.error_dict, fg="red", err=True)
 
-    click.echo("Your one-time login link has been generated")
+    click.echo("A one-time login link has been generated")
     click.secho(result["url"], fg="green")

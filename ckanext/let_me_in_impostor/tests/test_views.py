@@ -24,14 +24,20 @@ class TestImpostorViews:
 
     def test_impostor_view_sysadmin_access(self, app, sysadmin: dict[str, Any]):
         """Sysadmin can access impostor view."""
-        resp = app.get("/ckan-admin/impostor", headers={"Authorization": sysadmin["token"]})
+        resp = app.get(
+            "/ckan-admin/impostor", headers={"Authorization": sysadmin["token"]}
+        )
 
         assert resp.status_code == 200
         assert "Impostor Sessions" in resp.body or "sessions" in resp.body
 
-    def test_impostor_view_shows_sessions(self, app, sysadmin: dict[str, Any], impostor_session: ImpostorSession):
+    def test_impostor_view_shows_sessions(
+        self, app, sysadmin: dict[str, Any], impostor_session: ImpostorSession
+    ):
         """Impostor view displays existing sessions."""
-        resp = app.get("/ckan-admin/impostor", headers={"Authorization": sysadmin["token"]})
+        resp = app.get(
+            "/ckan-admin/impostor", headers={"Authorization": sysadmin["token"]}
+        )
 
         assert resp.status_code == 200
 
@@ -44,7 +50,7 @@ class TestImpostorViews:
         otl_url = "http://example.com/otl/link"
 
         resp = app.get(
-            f"/ckan-admin/impostor?otl_link={otl_url}",
+            f"/ckan-admin/impostor?otl_link={otl_url}&otl_user=exampleuser",
             headers={"Authorization": sysadmin["token"]},
         )
 
@@ -64,10 +70,14 @@ class TestImpostorViews:
 
         # Create a session that expires in the past
         past_time = 3600  # 1 hour ago
-        old_session = impostor_session_factory(user_id=user["id"], target_user_id=target_user["id"], expires=past_time)
+        old_session = impostor_session_factory(
+            user_id=user["id"], target_user_id=target_user["id"], expires=past_time
+        )
 
         with freeze_time(datetime.now() + timedelta(days=1)):  # noqa: DTZ005
-            app.get("/ckan-admin/impostor", headers={"Authorization": sysadmin["token"]})
+            app.get(
+                "/ckan-admin/impostor", headers={"Authorization": sysadmin["token"]}
+            )
 
         refreshed_session = ImpostorSession.get(old_session.id)
         assert refreshed_session is not None
@@ -76,7 +86,9 @@ class TestImpostorViews:
 
 @pytest.mark.usefixtures("with_plugins", "reset_db_once")
 class TestBurrowIdentityView:
-    def test_burrow_identity_requires_sysadmin(self, app, user_factory: Callable[..., dict[str, Any]]):
+    def test_burrow_identity_requires_sysadmin(
+        self, app, user_factory: Callable[..., dict[str, Any]]
+    ):
         """Regular users can't burrow identity."""
         user = user_factory()
         target_user = user_factory()
@@ -84,12 +96,14 @@ class TestBurrowIdentityView:
         resp = app.post(
             "/ckan-admin/burrow-identity",
             data={"user_id": target_user["id"]},
-            environ_overrides={"REMOTE_USER": user["name"]},
+            headers={"Authorization": user["name"]},
         )
 
         assert resp.status_code == 403
 
-    def test_burrow_identity_success(self, app, user: dict[str, Any], sysadmin: dict[str, Any]):
+    def test_burrow_identity_success(
+        self, app, user: dict[str, Any], sysadmin: dict[str, Any]
+    ):
         """Sysadmin can successfully burrow identity."""
         resp = app.post(
             "/ckan-admin/burrow-identity",
@@ -99,10 +113,10 @@ class TestBurrowIdentityView:
 
         assert user["display_name"] in resp.body
 
-    def test_burrow_identity_creates_session(self, app, user: dict[str, Any], sysadmin: dict[str, Any]):
+    def test_burrow_identity_creates_session(
+        self, app, user: dict[str, Any], sysadmin: dict[str, Any]
+    ):
         """Burrowing identity creates impostor session."""
-        user = factories.User()
-
         app.post(
             "/ckan-admin/burrow-identity",
             data={"user_id": user["id"]},
@@ -154,14 +168,15 @@ class TestBurrowIdentityView:
         assert "Active user not found" in resp.body
 
     @patch("ckanext.let_me_in_impostor.views.tk.h.lmi_is_current_user_an_impostor")
-    def test_burrow_identity_already_impersonating(self, mock_is_impostor, app, sysadmin: dict[str, Any]):
+    def test_burrow_identity_already_impersonating(
+        self, mock_is_impostor, app, sysadmin: dict[str, Any], user: dict[str, Any]
+    ):
         """Can't burrow identity when already impersonating."""
         mock_is_impostor.return_value = True
-        target_user = factories.User()
 
         resp = app.post(
             "/ckan-admin/burrow-identity",
-            data={"user_id": target_user["id"]},
+            data={"user_id": user["id"]},
             headers={"Authorization": sysadmin["token"]},
         )
 
@@ -180,14 +195,16 @@ class TestReturnIdentityView:
     ):
         """Successfully return to original identity."""
         client = app.flask_app.test_client()
-        impostor_session = impostor_session_factory(user_id=sysadmin["id"], target_user_id=user["id"])
+        impostor_session = impostor_session_factory(
+            user_id=sysadmin["id"], target_user_id=user["id"]
+        )
 
         with client.session_transaction() as sess:
             sess["lmi_impostor_session_id"] = impostor_session.id
 
         resp = client.post(
             "/ckan-admin/return-identity",
-            environ_overrides={"REMOTE_USER": impostor_session.target_user.name},
+            headers={"Authorization": impostor_session.target_user.name},
             follow_redirects=True,
         )
 
@@ -231,19 +248,21 @@ class TestReturnIdentityView:
 
 @pytest.mark.usefixtures("with_plugins", "reset_db_once")
 class TestTerminateSessionView:
-    def test_terminate_session_requires_sysadmin(self, app, impostor_session):
+    def test_terminate_session_requires_sysadmin(
+        self, app, impostor_session: ImpostorSession, user: dict[str, Any]
+    ):
         """Regular users can't terminate sessions."""
-        user = factories.User()
-
         resp = app.post(
             "/ckan-admin/terminate-session",
             data={"session_id": impostor_session.id},
-            environ_overrides={"REMOTE_USER": user["name"]},
+            headers={"Authorization": user["token"]},
         )
 
         assert resp.status_code == 403
 
-    def test_terminate_session_success(self, app, sysadmin: dict[str, Any], impostor_session: ImpostorSession):
+    def test_terminate_session_success(
+        self, app, sysadmin: dict[str, Any], impostor_session: ImpostorSession
+    ):
         """Sysadmin can terminate sessions."""
         resp = app.post(
             "/ckan-admin/terminate-session",
@@ -287,13 +306,11 @@ class TestTerminateSessionView:
 
 @pytest.mark.usefixtures("with_plugins", "reset_db_once")
 class TestClearSessionHistoryView:
-    def test_clear_session_history_requires_sysadmin(self, app):
+    def test_clear_session_history_requires_sysadmin(self, app, user: dict[str, Any]):
         """Regular users can't clear session history."""
-        user = factories.User()
-
         resp = app.post(
             "/ckan-admin/clear-session-history",
-            environ_overrides={"REMOTE_USER": user["name"]},
+            headers={"Authorization": user["token"]},
         )
 
         assert resp.status_code == 403
@@ -321,7 +338,9 @@ class TestClearSessionHistoryView:
 
 @pytest.mark.usefixtures("with_plugins", "reset_db_once")
 class TestGenerateOTLView:
-    def test_generate_otl_requires_sysadmin(self, app, user_factory: Callable[..., dict[str, Any]]):
+    def test_generate_otl_requires_sysadmin(
+        self, app, user_factory: Callable[..., dict[str, Any]]
+    ):
         """Regular users can't generate OTL."""
         user = user_factory()
         target_user = user_factory()
@@ -329,12 +348,14 @@ class TestGenerateOTLView:
         resp = app.post(
             "/ckan-admin/generate-otl",
             data={"otl_user_id": target_user["id"]},
-            environ_overrides={"REMOTE_USER": user["name"]},
+            headers={"Authorization": user["token"]},
         )
 
         assert resp.status_code == 403
 
-    def test_generate_otl_success(self, app, sysadmin: dict[str, Any], user_factory: Callable[..., dict[str, Any]]):
+    def test_generate_otl_success(
+        self, app, sysadmin: dict[str, Any], user_factory: Callable[..., dict[str, Any]]
+    ):
         """Sysadmin can generate OTL."""
         target_user = user_factory()
 
@@ -345,11 +366,13 @@ class TestGenerateOTLView:
         )
 
         data = resp.get_data(as_text=True)
-        assert "Your one-time login link has been generated" in data
+        assert "A one-time login link has been generated" in data
 
     def test_generate_otl_no_user_selected(self, app, sysadmin: dict[str, Any]):
         """Generate OTL fails without user selection."""
-        resp = app.post("/ckan-admin/generate-otl", headers={"Authorization": sysadmin["token"]})
+        resp = app.post(
+            "/ckan-admin/generate-otl", headers={"Authorization": sysadmin["token"]}
+        )
 
         data = resp.get_data(as_text=True)
         assert "No active user found for" in data
@@ -386,5 +409,11 @@ class TestGenerateOTLView:
         )
 
         data = resp.get_data(as_text=True)
-        assert "Your one-time login link has been generated" in data
-        assert f"It can be used only once and will expire either after use or in {custom_ttl} seconds" in data
+        assert (
+            f"A one-time login link has been generated for {target_user['display_name']}"
+            in data
+        )
+        assert (
+            f"It can only be used once and will expire after it's used or in {custom_ttl} seconds"
+            in data
+        )

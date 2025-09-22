@@ -9,7 +9,7 @@
         {% if otl_link and otl_ttl %}
             <div class="alert alert-info" role="alert">
                 <i class="fa fa-info-circle" aria-hidden="true"></i>
-                {{ _("Your one-time login link has been generated. It can be used only once and will expire either after use or in {} seconds.").format(otl_ttl) }}
+                {{ _("A one-time login link has been generated for {}. It can only be used once and will expire after it's used or in {} seconds.").format(otl_user, otl_ttl) }}
                 <br>
                 <a class="text-break" href="{{ otl_link }}"><b>{{ otl_link }}</b></a>
 

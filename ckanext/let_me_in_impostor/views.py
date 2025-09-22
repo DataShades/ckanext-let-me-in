@@ -32,12 +32,18 @@ class ImpostorView(MethodView):
         sessions = ImpostorSession.all()
         otl_link = tk.request.args.get("otl_link")
         otl_ttl = tk.request.args.get("otl_ttl")
+        otl_user = tk.request.args.get("otl_user")
 
         self._check_expired_session()
 
         return tk.render(
             "let_me_in_impostor/impostor.html",
-            extra_vars={"sessions": sessions, "otl_link": otl_link, "otl_ttl": otl_ttl},
+            extra_vars={
+                "sessions": sessions,
+                "otl_link": otl_link,
+                "otl_ttl": otl_ttl,
+                "otl_user": otl_user,
+            },
         )
 
     def _check_expired_session(self) -> None:
@@ -53,7 +59,9 @@ class ImpostorView(MethodView):
 class BurrowIdentityView(MethodView):
     def post(self) -> Response:
         if tk.h.lmi_is_current_user_an_impostor():
-            tk.h.flash_error(tk._("You are already impersonating another user"), "error")
+            tk.h.flash_error(
+                tk._("You are already impersonating another user"), "error"
+            )
             return tk.redirect_to("let_me_in_impostor.impostor")
 
         ttl = lmi_config.get_impostor_ttl()
@@ -96,7 +104,9 @@ class ReturnIdentityView(MethodView):
         tk.login_user(imp_session.user)
         lmi_utils.update_user_last_active(imp_session.user)
 
-        tk.h.flash_success(tk._("You have returned to your original identity."), "success")
+        tk.h.flash_success(
+            tk._("You have returned to your original identity."), "success"
+        )
 
         return tk.redirect_to("let_me_in_impostor.impostor")
 
@@ -112,7 +122,9 @@ class TerminateSessionView(MethodView):
 
         session.terminate()
 
-        tk.h.flash_success(tk._("The impersonation session has been terminated."), "success")
+        tk.h.flash_success(
+            tk._("The impersonation session has been terminated."), "success"
+        )
 
         return tk.redirect_to(tk.url_for("let_me_in_impostor.impostor"))
 
@@ -146,18 +158,31 @@ class GenerateOTLView(MethodView):
                 {"uid": user.id, "ttl": ttl},
             )
         except tk.ValidationError as e:
-            tk.h.flash_error(tk._("Failed to generate OTL: {}").format(e.error_summary), "error")
+            tk.h.flash_error(
+                tk._("Failed to generate OTL: {}").format(e.error_summary), "error"
+            )
             return tk.redirect_to("let_me_in_impostor.impostor")
 
-        return tk.redirect_to("let_me_in_impostor.impostor", otl_link=result["url"], otl_ttl=ttl)
+        return tk.redirect_to(
+            "let_me_in_impostor.impostor",
+            otl_link=result["url"],
+            otl_ttl=ttl,
+            otl_user=user.display_name,
+        )
 
 
 bp.before_request(before_request)
 
 bp.add_url_rule("/impostor", view_func=ImpostorView.as_view("impostor"))
-bp.add_url_rule("/burrow-identity", view_func=BurrowIdentityView.as_view("burrow_identity"))
-bp.add_url_rule("/return-identity", view_func=ReturnIdentityView.as_view("return_identity"))
-bp.add_url_rule("/terminate-session", view_func=TerminateSessionView.as_view("terminate_session"))
+bp.add_url_rule(
+    "/burrow-identity", view_func=BurrowIdentityView.as_view("burrow_identity")
+)
+bp.add_url_rule(
+    "/return-identity", view_func=ReturnIdentityView.as_view("return_identity")
+)
+bp.add_url_rule(
+    "/terminate-session", view_func=TerminateSessionView.as_view("terminate_session")
+)
 bp.add_url_rule(
     "/clear-session-history",
     view_func=ClearSessionHistoryView.as_view("clear_session_history"),
